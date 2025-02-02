@@ -2,6 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+
+const watchlistRoutes = require("./routes/watchListRoute");
+const authMiddleware = require("./middleware/authMiddleware");
+
 const authRoutes = require("./routes/authRoute");
 
 const app = express();
@@ -24,6 +28,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 app.use("/api/auth", authRoutes);
+app.use("/api/watchlist", authMiddleware, watchlistRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
