@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const WatchList = require("../models/watchListModel");
+require("dotenv").config();
 
 // POST
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/add", authMiddleware, async (req, res) => {
   try {
     const { tmdbId } = req.body;
 
@@ -35,9 +36,42 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const watchlist = await WatchList.find({ user: req.user._id })
       .sort({ addedAt: -1 })
-      .select("tmdbId addedAt");
+      .lean();
 
-    res.status(200).json(watchlist);
+    const enrichedWatchList = await Promise.all(
+      watchlist.map(async (entry) => {
+        try {
+          const options = {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+            },
+          };
+
+          const response = await fetch(
+            `https://api.themoviedb.org/3/movie/${entry.tmdbId}?language=fr-FR`,
+            options
+          );
+
+          if (!response.ok) return null;
+
+          const movieData = await response.json();
+
+          return {
+            ...movieData,
+            watchlistEntryId: entry._id,
+            addedAt: entry.addedAt,
+          };
+        } catch (error) {
+          console.error(`Erreur TMDB pour ${entry.tmdbId}`, error);
+        }
+      })
+    );
+
+    const filteredList = enrichedWatchList.filter(Boolean);
+
+    res.status(200).json({ count: filteredList.length, results: filteredList });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

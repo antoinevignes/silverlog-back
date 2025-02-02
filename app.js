@@ -3,10 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const authRoutes = require("./routes/authRoute");
 const watchlistRoutes = require("./routes/watchListRoute");
 const authMiddleware = require("./middleware/authMiddleware");
-
-const authRoutes = require("./routes/authRoute");
 
 const app = express();
 app.use(express.json());
@@ -21,11 +20,6 @@ mongoose.connection.on("connected", () => {
 mongoose.connection.on("error", (err) => {
   console.error("Erreur de connexion à MongoDB :", err);
 });
-
-if (!process.env.JWT_SECRET) {
-  console.error("JWT_SECRET non défini");
-  process.exit(1);
-}
 
 app.use("/api/auth", authRoutes);
 app.use("/api/watchlist", authMiddleware, watchlistRoutes);
