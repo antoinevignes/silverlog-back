@@ -1,13 +1,12 @@
 const express = require("express");
-const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
-const WatchList = require("../models/watchListModel");
-require("dotenv").config();
+const router = express.Router();
+const Watched = require("../models/watchedModel");
 
 // POST
 router.post("/add", authMiddleware, async (req, res) => {
   try {
-    const { tmdbId } = req.body;
+    const { tmdbId, rating } = req.body;
 
     if (!tmdbId) {
       return res
@@ -15,37 +14,35 @@ router.post("/add", authMiddleware, async (req, res) => {
         .json({ message: "Veuillez rentrer un tmdbId valide." });
     }
 
-    const existingEntry = await WatchList.findOne({
+    const existingEntry = await Watched.findOne({
       user: req.user._id,
       tmdbId,
     });
 
     if (existingEntry) {
-      return res
-        .status(400)
-        .json({ message: "Ce film est déjà dans votre watchlist" });
+      return res.status(400).json({ message: "Vous avez déjà vu ce film" });
     }
 
-    const watchlistEntry = await WatchList.create({
+    const watchedEntry = await Watched.create({
       user: req.user._id,
       tmdbId,
+      rating,
     });
 
-    res.status(201).json(watchlistEntry);
+    res.status(201).json(watchedEntry);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 // GET
+
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const watchlist = await WatchList.find({ user: req.user._id })
-      .sort({ addedAt: -1 })
-      .lean();
+    const watched = await Watched.find({ user: req.user._id }).lean();
 
-    const enrichedWatchList = await Promise.all(
-      watchlist.map(async (movie) => {
+    const enrichedWatched = await Promise.all(
+      watched.map(async (movie) => {
         try {
           const options = {
             method: "GET",
@@ -63,19 +60,18 @@ router.get("/", authMiddleware, async (req, res) => {
           if (!response.ok) return null;
 
           const movieData = await response.json();
-
           return {
             ...movieData,
-            addedAt: movie.addedAt,
+            rating: movie.rating,
           };
         } catch (error) {
-          console.error(`Erreur TMDB pour ${entry.tmdbId}`, error);
+          console.error(`Erreur TMDB pour ${movie.tmdbId}:`, error);
+          return null;
         }
       })
     );
 
-    const filteredList = enrichedWatchList.filter(Boolean);
-
+    const filteredList = enrichedWatched.filter(Boolean);
     res.status(200).json({ count: filteredList.length, results: filteredList });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -85,18 +81,18 @@ router.get("/", authMiddleware, async (req, res) => {
 // DELETE
 router.delete("/:tmdbId", authMiddleware, async (req, res) => {
   try {
-    const deletedEntry = await WatchList.findOneAndDelete({
+    const deletedEntry = await Watched.findOneAndDelete({
       user: req.user._id,
       tmdbId: req.params.tmdbId,
     });
 
     if (!deletedEntry) {
-      return res
-        .status(404)
-        .json({ message: "Film non trouvé dans la watchlist" });
+      return res.status(404).json({
+        message: "Le film n'est pas dans la liste des films déjà vus.",
+      });
     }
 
-    res.json({ message: "Film retiré de la watchlist" });
+    res.json({ message: "Film retiré de la liste des films déjà vus." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
