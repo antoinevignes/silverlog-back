@@ -32,6 +32,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something broke!", error: err.message });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.listen(3200, () => {
   console.log("Serveur tourne sur le port 3200...");
 });
