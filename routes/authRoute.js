@@ -102,14 +102,12 @@ router.post("/edit", async (req, res) => {
 
     res.json({
       message: "Modifié avec succès !",
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        bio: user.bio,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      id: user._id,
+      username: username,
+      email: user.email,
+      bio: bio,
+      firstName: firstName,
+      lastName: lastName,
     });
   } catch (err) {
     res
