@@ -74,7 +74,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/edit", async (req, res) => {
   try {
-    const { newUsername, email } = req.body;
+    const { newUsername, email, bio, firstName, lastName } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -89,6 +89,9 @@ router.post("/edit", async (req, res) => {
       id: user._id,
       username: newUsername,
       email: user.email,
+      bio: bio,
+      firstName: firstName,
+      lastName: lastName,
     });
   } catch (err) {
     res
