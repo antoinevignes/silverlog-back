@@ -85,37 +85,4 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/edit", async (req, res) => {
-  try {
-    const { username, email, bio, firstName, lastName } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Email invalide." });
-    }
-
-    user.username = username;
-    user.bio = bio;
-    user.firstName = firstName;
-    user.lastName = lastName;
-    await user.save();
-
-    res.json({
-      message: "Modifié avec succès !",
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        bio: user.bio,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Modification impossible.", error: err.message });
-  }
-});
-
 module.exports = router;
