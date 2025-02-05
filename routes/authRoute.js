@@ -87,14 +87,14 @@ router.post("/login", async (req, res) => {
 
 router.post("/edit", async (req, res) => {
   try {
-    const { newUsername, email, bio, firstName, lastName } = req.body;
+    const { username, email, bio, firstName, lastName } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Email invalide." });
     }
 
-    user.username = newUsername;
+    user.username = username;
     user.bio = bio;
     user.firstName = firstName;
     user.lastName = lastName;
