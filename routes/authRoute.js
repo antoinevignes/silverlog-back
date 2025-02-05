@@ -74,7 +74,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/edit", async (req, res) => {
   try {
-    const { newUsername } = req.body;
+    const { newUsername, email } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
