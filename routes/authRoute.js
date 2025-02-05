@@ -90,7 +90,7 @@ router.post("/edit", async (req, res) => {
       username: newUsername,
       email: user.email,
     });
-  } catch (error) {
+  } catch (err) {
     res
       .status(500)
       .json({ message: "Modification impossible.", error: err.message });
