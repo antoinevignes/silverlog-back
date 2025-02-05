@@ -6,6 +6,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/authRoute");
 const watchlistRoutes = require("./routes/watchListRoute");
 const watchedRoutes = require("./routes/watchedRoute");
+const userRoutes = require("./routes/userRoute");
 
 const authMiddleware = require("./middleware/authMiddleware");
 
@@ -25,7 +26,8 @@ mongoose.connection.on("error", (err) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/watchlist", authMiddleware, watchlistRoutes);
-app.use("/api/watched", watchedRoutes);
+app.use("/api/watched", authMiddleware, watchedRoutes);
+app.use("/api/user", authMiddleware, userRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
