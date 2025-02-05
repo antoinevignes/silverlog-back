@@ -82,6 +82,9 @@ router.post("/edit", async (req, res) => {
     }
 
     user.username = newUsername;
+    user.bio = bio;
+    user.firstName = firstName;
+    user.lastName = lastName;
     await user.save();
 
     res.json({
