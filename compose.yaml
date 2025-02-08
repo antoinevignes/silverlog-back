@@ -12,6 +12,6 @@ services:
     build:
       context: .
     environment:
-      NODE_ENV: production
+      - MONGODB_URI=${MONGODB_URI}
     ports:
       - 3000:3000
