@@ -20,6 +20,14 @@ router.post("/add", authMiddleware, async (req, res) => {
     });
 
     if (existingEntry) {
+      if (existingEntry.rating !== rating) {
+        const updatedEntry = await Watched.findOneAndUpdate(
+          { user: req.user._id, tmdbId },
+          { rating },
+          { new: true }
+        );
+        return res.status(200).json(updatedEntry);
+      }
       return res.status(400).json({ message: "Vous avez déjà vu ce film" });
     }
 
