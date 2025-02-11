@@ -1,4 +1,4 @@
-FROM node:22.11.0-alpine
+FROM node:22.11.0-alpine AS dev
 
 WORKDIR /app
 
@@ -8,6 +8,18 @@ RUN npm ci
 
 COPY .. .
 
-EXPOSE 3000
-
 CMD ["npm", "run", "dev"]
+
+# PRODUCTION
+
+FROM node:22.11.0-alpine AS prod
+
+WORKDIR /app
+
+COPY ../package*.json ./
+
+RUN npm ci --only=production
+
+COPY .. .
+
+CMD ["node", "app.js"]
