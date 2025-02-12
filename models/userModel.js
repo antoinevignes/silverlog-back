@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  location: {
+    type: String,
+    required: false,
+  },
 });
 
 userSchema.pre("save", async function (next) {

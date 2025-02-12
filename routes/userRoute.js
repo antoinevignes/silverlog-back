@@ -5,7 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/edit", authMiddleware, async (req, res) => {
   try {
-    const { username, email, bio, firstName, lastName } = req.body;
+    const { username, email, bio, firstName, lastName, location } = req.body;
     const user = req.user;
 
     if (email !== user.email) {
@@ -20,6 +20,7 @@ router.post("/edit", authMiddleware, async (req, res) => {
     user.bio = bio;
     user.firstName = firstName;
     user.lastName = lastName;
+    user.location = location;
 
     await user.save();
 
@@ -32,6 +33,7 @@ router.post("/edit", authMiddleware, async (req, res) => {
         bio: user.bio,
         firstName: user.firstName,
         lastName: user.lastName,
+        location: user.location,
       },
     });
   } catch (err) {
